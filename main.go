@@ -11,7 +11,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func menuHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "menu.html")
+	http.ServeFile(w, r, "static/menu.html")
 }
 
 func main() {
