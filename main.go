@@ -14,10 +14,18 @@ func menuHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "static/menu.html")
 }
 
+func orderHandler(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Fprintf(w, "Order Placed")
+}
+
 func main() {
 	http.HandleFunc("/", homeHandler)
 	http.HandleFunc("/menu", menuHandler)
+	http.HandleFunc("/order", orderHandler)
+
 	// Serve static files (CSS, JavaScript, images, etc.)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
