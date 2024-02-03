@@ -15,7 +15,6 @@ func menuHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func orderHandler(w http.ResponseWriter, r *http.Request) {
-
 	fmt.Fprintf(w, "Order Placed")
 }
 
