@@ -66,6 +66,7 @@ func Baking(ord order.Order) {
 }
 
 func preparePizza(ord order.Order) {
+	log.Printf("Starting order #%d", ord.OrderID)
 	for _, pizza := range ord.Pizzas {
 		start := time.Now()
 		for _, ingredient := range pizza.Ingredients {
@@ -79,7 +80,7 @@ func preparePizza(ord order.Order) {
 }
 
 func StartKitchen(orderQueue chan order.Order) {
-	semaphore := make(chan struct{}, 3)
+	semaphore := make(chan struct{}, 5)
 	var wg sync.WaitGroup
 	for ord := range orderQueue {
 		wg.Add(1)

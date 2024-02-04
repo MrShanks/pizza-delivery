@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/MrShanks/pizza-delivery/Restaurant/order"
 )
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -26,5 +29,16 @@ func main() {
 	// Serve static files (CSS, JavaScript, images, etc.)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
+	ord := order.NewOrder()
+
+	ord.AddPizza(order.Margherita())
+	ord.AddPizza(order.Capricciosa())
+
+	ordJSON, err := json.MarshalIndent(ord, "", "  ")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	fmt.Println(string(ordJSON))
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
