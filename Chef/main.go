@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
+	"log"
 	"math/rand"
 	"net/http"
 	"sync"
@@ -31,17 +31,15 @@ var (
 	pizzaTimeHistogram = promauto.NewHistogram(prometheus.HistogramOpts{
 		Name:    "Restaurant_pizza_making_duration_seconds",
 		Help:    "The amount of time needed to make a pizza",
-		Buckets: []float64{1, 2, 4, 8, 16},
+		Buckets: []float64{8, 16, 24, 32},
 	})
 )
 
 var orderQueue = make(chan order.Order, 10)
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func preparationHandler(w http.ResponseWriter, r *http.Request) {
 	ord := order.NewOrder()
-
 	body, err := io.ReadAll(r.Body)
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -52,9 +50,35 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	orderQueue <- ord
 	orderQueueGauge.Inc()
 }
+func Preparing(ord order.Order, ingredient string) {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	preparingTime := time.Duration(r.Intn(2000)+2000) * time.Millisecond
+	time.Sleep(preparingTime)
+	log.Printf("#%d Preparing... Adding %q. Time elapsed: %v", ord.OrderID, ingredient, preparingTime)
+}
+
+func Baking(ord order.Order) {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	bakingTime := time.Duration(r.Intn(2000)+3000) * time.Millisecond
+	time.Sleep(bakingTime)
+	log.Printf("#%d Baking... Time elapsed: %v", ord.OrderID, bakingTime)
+	log.Printf("#%d Pizza is ready!", ord.OrderID)
+}
+
+func preparePizza(ord order.Order) {
+	for _, pizza := range ord.Pizzas {
+		start := time.Now()
+		for _, ingredient := range pizza.Ingredients {
+			Preparing(ord, ingredient)
+		}
+		Baking(ord)
+		pizzaTimeHistogram.Observe(time.Since(start).Seconds())
+		pizzaMadeCounter.Inc()
+	}
+
+}
 
 func StartKitchen(orderQueue chan order.Order) {
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	semaphore := make(chan struct{}, 3)
 	var wg sync.WaitGroup
 	for ord := range orderQueue {
@@ -64,20 +88,7 @@ func StartKitchen(orderQueue chan order.Order) {
 			semaphore <- struct{}{}
 			orderQueueGauge.Dec()
 			activeChefGauge.Inc()
-			fmt.Printf("Preparing order number: #%d\n", ord.OrderID)
-			for _, pizza := range ord.Pizzas {
-				start := time.Now()
-				for _, ingredient := range pizza.Ingredients {
-					time.Sleep(time.Duration(r.Intn(3000)) * time.Millisecond)
-					fmt.Printf("#%d: Adding: %q\n", ord.OrderID, ingredient)
-				}
-				time.Sleep(time.Duration(r.Intn(2000)) * time.Millisecond)
-				fmt.Printf("#%d: Pizza is ready\n", ord.OrderID)
-				pizzaTimeHistogram.Observe(time.Since(start).Seconds())
-				fmt.Println(time.Since(start).Seconds())
-				pizzaMadeCounter.Inc()
-
-			}
+			preparePizza(ord)
 			<-semaphore
 			activeChefGauge.Dec()
 		}(ord)
@@ -87,7 +98,7 @@ func StartKitchen(orderQueue chan order.Order) {
 
 func main() {
 
-	http.HandleFunc("/kitchen", handler)
+	http.HandleFunc("/kitchen", preparationHandler)
 	http.Handle("/metrics", promhttp.Handler())
 	go StartKitchen(orderQueue)
 	http.ListenAndServe(":3010", nil)
