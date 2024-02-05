@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/MrShanks/pizza-delivery/Restaurant/order"
+	"github.com/MrShanks/pizza-delivery/pkg/restaurant"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -35,10 +35,10 @@ var (
 	})
 )
 
-var orderQueue = make(chan order.Order, 10)
+var orderQueue = make(chan restaurant.Order, 10)
 
 func preparationHandler(w http.ResponseWriter, r *http.Request) {
-	ord := order.NewOrder()
+	ord := restaurant.NewOrder()
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -50,14 +50,14 @@ func preparationHandler(w http.ResponseWriter, r *http.Request) {
 	orderQueue <- ord
 	orderQueueGauge.Inc()
 }
-func Preparing(ord order.Order, ingredient string) {
+func Preparing(ord restaurant.Order, ingredient string) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	preparingTime := time.Duration(r.Intn(2000)+2000) * time.Millisecond
 	time.Sleep(preparingTime)
 	log.Printf("#%d Preparing... Adding %q. Time elapsed: %v", ord.OrderID, ingredient, preparingTime)
 }
 
-func Baking(ord order.Order) {
+func Baking(ord restaurant.Order) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	bakingTime := time.Duration(r.Intn(2000)+3000) * time.Millisecond
 	time.Sleep(bakingTime)
@@ -66,7 +66,7 @@ func Baking(ord order.Order) {
 	log.Printf("#%d Pizza is ready!", ord.OrderID)
 }
 
-func preparePizza(ord order.Order) {
+func preparePizza(ord restaurant.Order) {
 	log.Printf("Starting order #%d", ord.OrderID)
 	for _, pizza := range ord.Pizzas {
 		start := time.Now()
@@ -80,12 +80,12 @@ func preparePizza(ord order.Order) {
 
 }
 
-func StartKitchen(orderQueue chan order.Order) {
+func StartKitchen(orderQueue chan restaurant.Order) {
 	semaphore := make(chan struct{}, 5)
 	var wg sync.WaitGroup
 	for ord := range orderQueue {
 		wg.Add(1)
-		go func(ord order.Order) {
+		go func(ord restaurant.Order) {
 			defer wg.Done()
 			semaphore <- struct{}{}
 			orderQueueGauge.Dec()

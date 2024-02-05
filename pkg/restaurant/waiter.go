@@ -1,22 +1,17 @@
-package waiter
+package restaurant
 
 import (
 	"bytes"
 	"encoding/json"
 	"log"
 	"net/http"
-
-	"github.com/MrShanks/pizza-delivery/Restaurant/order"
 )
 
-type Waiter struct {
-}
-
-func AddPizza(ord *order.Order, pizza order.Pizza) {
+func AddPizza(ord *Order, pizza Pizza) {
 	ord.Pizzas = append(ord.Pizzas, pizza)
 }
 
-func SendOrder(ord order.Order) {
+func SendOrder(ord Order) {
 	ordJSON, err := json.Marshal(ord)
 	if err != nil {
 		log.Fatal("Error marshalling JSON: ", err)
