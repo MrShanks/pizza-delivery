@@ -13,6 +13,10 @@ func AddPizza(ord *Order, pizza Pizza) {
 	ord.Pizzas = append(ord.Pizzas, pizza)
 }
 
+func RemovePizza(ord *Order, index int) {
+	ord.Pizzas = append(ord.Pizzas[:index], ord.Pizzas[index+1:]...)
+}
+
 func SendOrder(ord Order) {
 	ordJSON, err := json.Marshal(ord)
 	if err != nil {

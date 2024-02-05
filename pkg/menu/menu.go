@@ -20,7 +20,7 @@ func Capricciosa() restaurant.Pizza {
 
 func Diavola() restaurant.Pizza {
 	return restaurant.Pizza{
-		Name: "Margherita",
+		Name: "Diavola",
 		Cost: 21,
 		Ings: []string{"Mozarella", "Tomato Sauce", "Chily", "Pepperoni"},
 	}
@@ -28,7 +28,7 @@ func Diavola() restaurant.Pizza {
 
 func Calabra() restaurant.Pizza {
 	return restaurant.Pizza{
-		Name: "Margherita",
+		Name: "Calabra",
 		Cost: 21,
 		Ings: []string{"Mozarella", "Tomato Sauce", "Chily", "Pepperoni", "Nduia", "Provola", "Garlic"},
 	}

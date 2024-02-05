@@ -46,6 +46,7 @@ func preparationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.Unmarshal(body, &ord)
+	log.Printf("Order #%d added to the queue, %+v your order is going to be ready soon", ord.OrderID, ord.Pizzas)
 
 	orderQueue <- ord
 	orderQueueGauge.Inc()
@@ -57,13 +58,13 @@ func Preparing(ord restaurant.Order, ingredient string) {
 	log.Printf("#%d Preparing... Adding %q. Time elapsed: %v", ord.OrderID, ingredient, preparingTime)
 }
 
-func Baking(ord restaurant.Order) {
+func Baking(ord restaurant.Order, pizzaName string) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	bakingTime := time.Duration(r.Intn(5000)+1000) * time.Millisecond
 	time.Sleep(bakingTime)
 	log.Printf("#%d Baking... Time elapsed: %v", ord.OrderID, bakingTime)
 	time.Sleep(100 * time.Millisecond)
-	log.Printf("#%d Pizza is ready!", ord.OrderID)
+	log.Printf("#%d Pizza %s is ready!", ord.OrderID, pizzaName)
 }
 
 func preparePizza(ord restaurant.Order) {
@@ -73,7 +74,7 @@ func preparePizza(ord restaurant.Order) {
 		for _, ingredient := range pizza.Ings {
 			Preparing(ord, ingredient)
 		}
-		Baking(ord)
+		Baking(ord, pizza.Name)
 		pizzaTimeHistogram.Observe(time.Since(start).Seconds())
 		pizzaMadeCounter.Inc()
 	}

@@ -9,14 +9,18 @@ import (
 	"os"
 	"time"
 
-	"github.com/MrShanks/pizza-delivery/pkg/kitchen/restaurant/order"
+	"github.com/MrShanks/pizza-delivery/pkg/menu"
+	"github.com/MrShanks/pizza-delivery/pkg/restaurant"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 const url = "http://localhost:3010/kitchen"
 
+var order = restaurant.NewOrder()
+
 type model struct {
-	choices  []string         // items on the to-do list
+	choices  []string // items on the to-do list
+	pizzas   []restaurant.Pizza
 	cursor   int              // which to-do list item our cursor is pointing at
 	selected map[int]struct{} // which to-do items are selected
 	status   int
@@ -26,17 +30,31 @@ type model struct {
 func initialModel() model {
 	return model{
 		choices:  []string{"Margherita", "Capricciosa", "Diavola", "Calabra"},
+		pizzas:   []restaurant.Pizza{menu.Margherita(), menu.Capricciosa(), menu.Diavola(), menu.Calabra()},
 		selected: make(map[int]struct{}),
 	}
 }
 
 func (m model) Init() tea.Cmd {
 	// Just return `nil`, which means "no I/O right now, please."
-	return checkServer
+	return nil
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+
+	case statusMsg:
+		// The server returned a status message. Save it to our model. Also
+		// tell the Bubble Tea runtime we want to exit because we have nothing
+		// else to do. We'll still be able to render a final view with our
+		// status message.
+		m.status = int(msg)
+
+	case errMsg:
+		// There was an error. Note it in the model. And tell the runtime
+		// we're done and want to quit.
+		m.err = msg
+		return m, tea.Quit
 
 	// Is it a key press?
 	case tea.KeyMsg:
@@ -60,14 +78,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.cursor++
 			}
 
+		case "s":
+			SendOrder(&order)
+			order = restaurant.NewOrder()
+			for key, _ := range m.selected {
+				delete(m.selected, key)
+			}
+
 		// The "enter" key and the spacebar (a literal space) toggle
 		// the selected state for the item that the cursor is pointing at.
 		case "enter", " ":
 			_, ok := m.selected[m.cursor]
 			if ok {
 				delete(m.selected, m.cursor)
+				restaurant.RemovePizza(&order, m.cursor)
 			} else {
 				m.selected[m.cursor] = struct{}{}
+				restaurant.AddPizza(&order, m.pizzas[m.cursor])
 			}
 		}
 	}
@@ -101,11 +128,31 @@ func (m model) View() string {
 	}
 
 	// The footer
-	s += "\nPress q to quit.\n"
+	s += "\nPress s to send the order\nPress q to quit.\n"
 
 	// Send the UI for rendering
 	return s
 }
+
+func SendOrder(order *restaurant.Order) tea.Msg {
+	c := &http.Client{Timeout: 10 * time.Second}
+	ordJSON, err := json.Marshal(order)
+	if err != nil {
+		log.Fatal("Error marshalling JSON: ", err)
+	}
+	res, err := c.Post(url, "application/json", bytes.NewBuffer(ordJSON))
+
+	if err != nil {
+		return errMsg{err}
+	}
+	return statusMsg(res.StatusCode)
+}
+
+type statusMsg int
+
+type errMsg struct{ err error }
+
+func (e errMsg) Error() string { return e.err.Error() }
 
 func main() {
 	p := tea.NewProgram(initialModel())
@@ -114,31 +161,3 @@ func main() {
 		os.Exit(1)
 	}
 }
-
-func checkServer() tea.Msg {
-
-	// Create an HTTP client and make a GET request.
-	c := &http.Client{Timeout: 10 * time.Second}
-	ordJSON, err := json.Marshal(order.NewOrder())
-	if err != nil {
-		log.Fatal("Error marshalling JSON: ", err)
-	}
-	res, err := c.Post(url, "application/json", bytes.NewBuffer(ordJSON))
-
-	if err != nil {
-		// There was an error making our request. Wrap the error we received
-		// in a message and return it.
-		return errMsg{err}
-	}
-	// We received a response from the server. Return the HTTP status code
-	// as a message.
-	return statusMsg(res.StatusCode)
-}
-
-type statusMsg int
-
-type errMsg struct{ err error }
-
-// For messages that contain errors it's often handy to also implement the
-// error interface on the message.
-func (e errMsg) Error() string { return e.err.Error() }
