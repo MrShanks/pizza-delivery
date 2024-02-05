@@ -91,7 +91,3 @@ func Diavola() Pizza {
 			TomatoSauce(),
 			Chily())}
 }
-
-func (o *Order) AddPizza(pizza Pizza) {
-	o.Pizzas = append(o.Pizzas, pizza)
-}

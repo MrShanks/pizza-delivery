@@ -62,6 +62,7 @@ func Baking(ord order.Order) {
 	bakingTime := time.Duration(r.Intn(2000)+3000) * time.Millisecond
 	time.Sleep(bakingTime)
 	log.Printf("#%d Baking... Time elapsed: %v", ord.OrderID, bakingTime)
+	time.Sleep(100 * time.Millisecond)
 	log.Printf("#%d Pizza is ready!", ord.OrderID)
 }
 
