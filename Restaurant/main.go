@@ -36,5 +36,11 @@ func main() {
 	waiter.AddPizza(&order1, order.Diavola())
 	waiter.SendOrder(order1)
 
+	order2 := order.NewOrder()
+	waiter.AddPizza(&order2, order.Margherita())
+	waiter.AddPizza(&order2, order.Capricciosa())
+	waiter.AddPizza(&order2, order.Diavola())
+	waiter.SendOrder(order2)
+
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

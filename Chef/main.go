@@ -70,7 +70,7 @@ func preparePizza(ord order.Order) {
 	log.Printf("Starting order #%d", ord.OrderID)
 	for _, pizza := range ord.Pizzas {
 		start := time.Now()
-		for _, ingredient := range pizza.Ingredients {
+		for _, ingredient := range pizza.Ings {
 			Preparing(ord, ingredient)
 		}
 		Baking(ord)
