@@ -7,6 +7,8 @@ import (
 	"net/http"
 )
 
+var url = "http://localhost:3010/kitchen"
+
 func AddPizza(ord *Order, pizza Pizza) {
 	ord.Pizzas = append(ord.Pizzas, pizza)
 }
@@ -17,7 +19,7 @@ func SendOrder(ord Order) {
 		log.Fatal("Error marshalling JSON: ", err)
 	}
 
-	req, err := http.NewRequest("POST", "http://localhost:3010/kitchen", bytes.NewBuffer(ordJSON))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(ordJSON))
 	if err != nil {
 		log.Fatal("Error creating request: ", err)
 	}

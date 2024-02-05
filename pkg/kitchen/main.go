@@ -52,14 +52,14 @@ func preparationHandler(w http.ResponseWriter, r *http.Request) {
 }
 func Preparing(ord restaurant.Order, ingredient string) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	preparingTime := time.Duration(r.Intn(2000)+2000) * time.Millisecond
+	preparingTime := time.Duration(r.Intn(4000)+1000) * time.Millisecond
 	time.Sleep(preparingTime)
 	log.Printf("#%d Preparing... Adding %q. Time elapsed: %v", ord.OrderID, ingredient, preparingTime)
 }
 
 func Baking(ord restaurant.Order) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	bakingTime := time.Duration(r.Intn(2000)+3000) * time.Millisecond
+	bakingTime := time.Duration(r.Intn(5000)+1000) * time.Millisecond
 	time.Sleep(bakingTime)
 	log.Printf("#%d Baking... Time elapsed: %v", ord.OrderID, bakingTime)
 	time.Sleep(100 * time.Millisecond)
