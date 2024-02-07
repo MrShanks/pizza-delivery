@@ -28,10 +28,10 @@ The kitchen microservice exposes prometheus compatible metrics:
 2. go run pkg/kitchen/main.go to start the kitchen microservice
 3. go run cmd/main.go to start the TUI terminal to place the orders
 
-![Terminal TUI](image-2.png)
+![Terminal TUI](images/image-2.png)
 
 ## Usage
 
 This project has been built with the only goal of creating a simulator to expose prometheus compatible metrics, visualize them in grafana and play around with different ways of monitoring the app behaviour.
 
-![Restaurant Dashboard](image.png)
+![Restaurant Dashboard](images/image.png)
