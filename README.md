@@ -15,8 +15,8 @@ The kitchen microservice exposes prometheus compatible metrics:
 - Restaurant_pizza_making_duration_seconds_bucket histogram
 
 ## Microservices
-- Kitchen --> it receives orders and delivers finished pizza, it is only triggered when There are Pizzas in the queue
-- Client --> can place orders trough the TUI terminal
+- Kitchen --> it receives orders and delivers finished pizza, it is only triggered when There are Pizzas in the queue.
+- Client --> can place orders trough the TUI terminal.
 
 ## Table of Contents
 
@@ -27,6 +27,7 @@ The kitchen microservice exposes prometheus compatible metrics:
 1. Clone the project on your local machine
 2. go run pkg/kitchen/main.go to start the kitchen microservice
 3. go run cmd/main.go to start the TUI terminal to place the orders
+
 ![Terminal TUI](image-2.png)
 
 ## Usage
