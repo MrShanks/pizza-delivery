@@ -91,7 +91,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			_, ok := m.selected[m.cursor]
 			if ok {
 				delete(m.selected, m.cursor)
-				restaurant.RemovePizza(&order, m.cursor)
+				pizza := m.pizzas[m.cursor]
+				restaurant.RemovePizza(&order, pizza)
 			} else {
 				m.selected[m.cursor] = struct{}{}
 				restaurant.AddPizza(&order, m.pizzas[m.cursor])

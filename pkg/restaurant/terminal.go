@@ -13,8 +13,12 @@ func AddPizza(ord *Order, pizza Pizza) {
 	ord.Pizzas = append(ord.Pizzas, pizza)
 }
 
-func RemovePizza(ord *Order, index int) {
-	ord.Pizzas = append(ord.Pizzas[:index], ord.Pizzas[index+1:]...)
+func RemovePizza(ord *Order, pizzaToRemove Pizza) {
+	for i, pizza := range ord.Pizzas {
+		if pizza.Name == pizzaToRemove.Name {
+			ord.Pizzas = append(ord.Pizzas[:i], ord.Pizzas[i+1:]...)
+		}
+	}
 }
 
 func SendOrder(ord Order) {
