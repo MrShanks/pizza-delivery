@@ -27,7 +27,7 @@ The kitchen microservice exposes prometheus compatible metrics:
 1. Clone the project on your local machine
 2. go run pkg/kitchen/main.go to start the kitchen microservice
 3. go run cmd/main.go to start the TUI terminal to place the orders
-![Terminal TUI](image-1.png)
+![Terminal TUI](image-2.png)
 
 ## Usage
 
