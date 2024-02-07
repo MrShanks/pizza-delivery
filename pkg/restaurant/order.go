@@ -13,10 +13,6 @@ type Order struct {
 	Pizzas  []Pizza
 }
 
-func (p *Pizza) Add(ingredient string) {
-	p.Ings = append(p.Ings, ingredient)
-}
-
 func NewOrder() Order {
 	OrderCount++
 	return Order{OrderID: OrderCount}

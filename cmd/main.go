@@ -19,10 +19,10 @@ const url = "http://localhost:3010/kitchen"
 var order = restaurant.NewOrder()
 
 type model struct {
-	choices  []string // items on the to-do list
+	choices  []string
 	pizzas   []restaurant.Pizza
-	cursor   int              // which to-do list item our cursor is pointing at
-	selected map[int]struct{} // which to-do items are selected
+	cursor   int
+	selected map[int]struct{}
 	status   int
 	err      error
 }
@@ -36,7 +36,6 @@ func initialModel() model {
 }
 
 func (m model) Init() tea.Cmd {
-	// Just return `nil`, which means "no I/O right now, please."
 	return nil
 }
 
@@ -44,35 +43,24 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 
 	case statusMsg:
-		// The server returned a status message. Save it to our model. Also
-		// tell the Bubble Tea runtime we want to exit because we have nothing
-		// else to do. We'll still be able to render a final view with our
-		// status message.
 		m.status = int(msg)
 
 	case errMsg:
-		// There was an error. Note it in the model. And tell the runtime
-		// we're done and want to quit.
 		m.err = msg
 		return m, tea.Quit
 
-	// Is it a key press?
 	case tea.KeyMsg:
 
-		// Cool, what was the actual key pressed?
 		switch msg.String() {
 
-		// These keys should exit the program.
 		case "ctrl+c", "q":
 			return m, tea.Quit
 
-		// The "up" and "k" keys move the cursor up
 		case "up", "k":
 			if m.cursor > 0 {
 				m.cursor--
 			}
 
-		// The "down" and "j" keys move the cursor down
 		case "down", "j":
 			if m.cursor < len(m.choices)-1 {
 				m.cursor++
@@ -85,8 +73,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				delete(m.selected, key)
 			}
 
-		// The "enter" key and the spacebar (a literal space) toggle
-		// the selected state for the item that the cursor is pointing at.
 		case "enter", " ":
 			_, ok := m.selected[m.cursor]
 			if ok {
@@ -100,38 +86,29 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	// Return the updated model to the Bubble Tea runtime for processing.
-	// Note that we're not returning a command.
 	return m, nil
 }
 
 func (m model) View() string {
-	// The header
 	s := "Welcome to pizza-delivery restaurant, what pizza do you want?\n\n"
 
-	// Iterate over our choices
 	for i, choice := range m.choices {
 
-		// Is the cursor pointing at this choice?
-		cursor := " " // no cursor
+		cursor := " "
 		if m.cursor == i {
-			cursor = ">" // cursor!
+			cursor = ">"
 		}
 
-		// Is this choice selected?
-		checked := " " // not selected
+		checked := " "
 		if _, ok := m.selected[i]; ok {
-			checked = "x" // selected!
+			checked = "x"
 		}
 
-		// Render the row
 		s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
 	}
 
-	// The footer
 	s += "\nPress s to send the order\nPress q to quit.\n"
 
-	// Send the UI for rendering
 	return s
 }
 
